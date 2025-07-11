@@ -20,8 +20,13 @@ const UserSchema = Schema({
     profilePicture: {
         type: String
     },
-    resetToken: String,
-    resetTokenExpire: Date
+    isAccountVerified: Boolean,
+    emailVerified: Boolean,
+    emailVerificationOtp: Date,
+    emailOtpExpiry: Date,
+    resetOtp: Number,
+    resetOtpExpire: Date,
+    resetOtpVerified: Boolean
 },
     {
         timestamps: true
