@@ -10,6 +10,7 @@ const app = express();
 
 // Import routes
 const authRoute = require('./routes/authRoute');
+const taskRoute = require('./routes/taskRoute');
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -38,6 +39,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoute);
+app.use('/api/task', taskRoute);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
