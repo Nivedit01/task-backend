@@ -101,6 +101,8 @@ const deleteUser = async (req, res) => {
             message: "Invalid credentials"
         });
 
+        await User.findByIdAndDelete(userId);
+
         res.status(200).json({
             success: true,
             status: 200,
