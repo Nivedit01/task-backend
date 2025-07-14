@@ -59,7 +59,7 @@ const userSignup = async (req, res) => {
 // user login
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email } = req.body;
 
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) return res.status(400).json({
@@ -68,7 +68,7 @@ const login = async (req, res) => {
             message: "User not found"
         });
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
         if (!isMatch) return res.status(401).json({
             success: false,
             status: 401,
@@ -79,11 +79,26 @@ const login = async (req, res) => {
             expiresIn: "10m" || process.env.JWT_EXPIRES_IN
         });
 
+        const {
+            password,
+            emailVerified,
+            resetOtp,
+            resetOtpExpire,
+            __v,
+            emailVerificationOtp,
+            emailOtpExpiry,
+            resetOtpVerified,
+            createdAt,
+            updatedAt,
+            ...userData
+        } = user.toObject();
+
         res.status(200).json({
             suucess: true,
             status: 200,
             message: "Login successful!",
-            token
+            token,
+            data: userData
         });
     } catch (err) {
         res.status(500).json({
@@ -143,46 +158,46 @@ const requestSignupOtp = async (req, res) => {
 
 // verify signup otp
 const verifySignupOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
+    try {
+        const { email, otp } = req.body;
 
-    const otpEntry = await SignupOtp.findOne({ email });
+        const otpEntry = await SignupOtp.findOne({ email });
 
-    if (!otpEntry) {
-      return res.status(400).json({
-        success: false,
-        message: "No OTP request found for this email"
-      });
+        if (!otpEntry) {
+            return res.status(400).json({
+                success: false,
+                message: "No OTP request found for this email"
+            });
+        }
+
+        if (otpEntry.otp !== Number(otp)) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid OTP"
+            });
+        }
+
+        if (otpEntry.otpExpire < Date.now()) {
+            return res.status(403).json({
+                success: false,
+                message: "OTP has expired"
+            });
+        }
+
+        otpEntry.verified = true;
+        await otpEntry.save();
+
+        res.status(200).json({
+            success: true,
+            message: "OTP verified successfully"
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
     }
-
-    if (otpEntry.otp !== Number(otp)) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid OTP"
-      });
-    }
-
-    if (otpEntry.otpExpire < Date.now()) {
-      return res.status(403).json({
-        success: false,
-        message: "OTP has expired"
-      });
-    }
-
-    otpEntry.verified = true;
-    await otpEntry.save();
-
-    res.status(200).json({
-      success: true,
-      message: "OTP verified successfully"
-    });
-
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
 };
 
 // forgot password send email
