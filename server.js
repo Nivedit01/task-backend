@@ -43,6 +43,11 @@ app.use('/api/auth', authRoute);
 app.use('/api/task', taskRoute);
 app.use('/api/user', userRoute);
 
+// ping api
+app.get("/health", (req, res) => {
+  res.status(200).send("ok");
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     const statusCode = err.status || 500;
