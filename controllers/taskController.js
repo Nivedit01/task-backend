@@ -6,7 +6,8 @@ const createTask = async (req, res) => {
         const { title, description, priority, completion, dueDate } = req.body;
         const userId = req.user.userId;  // assume auth middleware sets req.user
 
-        const existingData = await Task.findOne({ title });
+        console.log(req.user);
+        const existingData = await Task.findOne({ title, userId });
         if (existingData)
             return res.status(400).json({
                 success: false,
